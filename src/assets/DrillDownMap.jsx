@@ -3,7 +3,7 @@ import maplibregl from 'maplibre-gl';
 import * as turf from '@turf/turf';
 import { useFilters } from '../context/useFilters';
 import { useVisualizationState } from '../context/VisualizationState';
-import {mapPaths } from '../config/mapConfig';
+import { mapPaths } from '../config/mapConfig';
 
 // The ADM0 file is static for the session, so its parsed contents are cached
 // (as a promise, so concurrent callers share one in-flight fetch) and reused
