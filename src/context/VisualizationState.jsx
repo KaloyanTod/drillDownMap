@@ -34,14 +34,6 @@ export function VisualizationStateProvider({ children }) {
     };
 
     setVisualizationState(newState);
-
-    // Log detailed information about what's being visualized
-    console.log('📊 Visualization State Updated:', {
-      level: newState.level,
-      count: newState.metadata.count,
-      geographies: newState.visibleGeographies,
-      metadata: newState.metadata
-    });
   }, []);
 
   /**

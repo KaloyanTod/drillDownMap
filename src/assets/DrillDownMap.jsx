@@ -5,6 +5,21 @@ import { useFilters } from '../context/useFilters';
 import { useVisualizationState } from '../context/VisualizationState';
 import { countriesWithADM1, mapPaths } from '../config/mapConfig';
 
+// The ADM0 file is static for the session, so its parsed contents are cached
+// (as a promise, so concurrent callers share one in-flight fetch) and reused
+// across loadWorld()/loadCountryWithoutRegions() calls instead of re-fetching
+// and re-parsing the multi-MB file every time.
+const adm0DataCache = new Map();
+function getAdm0Data(url) {
+  if (!adm0DataCache.has(url)) {
+    adm0DataCache.set(url, fetch(url).then((res) => {
+      if (!res.ok) throw new Error(`Failed to load ${url}`);
+      return res.json();
+    }));
+  }
+  return adm0DataCache.get(url);
+}
+
 const DrillDownMap = ({
   adm0Path = mapPaths.adm0,
   adm1PathTemplate = mapPaths.adm1Template,
@@ -114,18 +129,19 @@ const DrillDownMap = ({
     if (map.getLayer('adm1-outline')) map.removeLayer('adm1-outline');
     if (map.getSource('adm1')) map.removeSource('adm1');
 
-    if (!map.getSource('adm0')) {
-      map.addSource('adm0', {
-        type: 'geojson',
-        data: adm0Path,
-        promoteId: 'shapeGroup',
-      });
-    }
-
-    // Extract and report visible countries from GeoJSON
+    // Fetch (or reuse the cached parse of) the ADM0 data once, and use the
+    // same parsed object both as the map source and for the visualization
+    // side panel, instead of fetching/parsing the file twice.
     try {
-      const response = await fetch(adm0Path);
-      const geoData = await response.json();
+      const geoData = await getAdm0Data(adm0Path);
+
+      if (!map.getSource('adm0')) {
+        map.addSource('adm0', {
+          type: 'geojson',
+          data: geoData,
+          promoteId: 'shapeGroup',
+        });
+      }
 
       const visibleCountries = geoData.features.map(feature => ({
         iso: feature.properties.shapeGroup,
@@ -139,7 +155,7 @@ const DrillDownMap = ({
         description: 'All countries from world_adm0_simplified.geojson'
       });
     } catch (err) {
-      console.error('Error extracting countries from GeoJSON:', err);
+      console.error('Error loading ADM0 GeoJSON:', err);
     }
 
     if (!map.getLayer('adm0-fill')) {
@@ -289,11 +305,8 @@ const DrillDownMap = ({
     if (!map) return;
 
     try {
-      // Fetch the ADM0 world data to get the country feature
-      const response = await fetch(adm0Path);
-      if (!response.ok) throw new Error(`Failed to load ${adm0Path}`);
-
-      const geo = await response.json();
+      // Reuse the cached ADM0 world data to get the country feature
+      const geo = await getAdm0Data(adm0Path);
 
       // Find the country feature by matching shapeGroup (ISO code)
       const countryFeature = geo.features.find(
