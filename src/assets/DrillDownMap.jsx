@@ -3,7 +3,7 @@ import maplibregl from 'maplibre-gl';
 import * as turf from '@turf/turf';
 import { useFilters } from '../context/useFilters';
 import { useVisualizationState } from '../context/VisualizationState';
-import { countriesWithADM1, mapPaths } from '../config/mapConfig';
+import {mapPaths } from '../config/mapConfig';
 
 // The ADM0 file is static for the session, so its parsed contents are cached
 // (as a promise, so concurrent callers share one in-flight fetch) and reused
@@ -300,31 +300,31 @@ const DrillDownMap = ({
     }
   }, [adm1PathTemplate, fillColor, updateVisualization]);
 
-  const loadCountryWithoutRegions = useCallback(async (countryISO) => {
-    const map = mapRef.current;
-    if (!map) return;
+  // const loadCountryWithoutRegions = useCallback(async (countryISO) => {
+  //   const map = mapRef.current;
+  //   if (!map) return;
 
-    try {
-      // Reuse the cached ADM0 world data to get the country feature
-      const geo = await getAdm0Data(adm0Path);
+  //   try {
+  //     // Reuse the cached ADM0 world data to get the country feature
+  //     const geo = await getAdm0Data(adm0Path);
 
-      // Find the country feature by matching shapeGroup (ISO code)
-      const countryFeature = geo.features.find(
-        f => f.properties.shapeGroup === countryISO
-      );
+  //     // Find the country feature by matching shapeGroup (ISO code)
+  //     const countryFeature = geo.features.find(
+  //       f => f.properties.shapeGroup === countryISO
+  //     );
 
-      if (!countryFeature) {
-        console.error(`Country ${countryISO} not found in ADM0 data`);
-        return;
-      }
+  //     if (!countryFeature) {
+  //       console.error(`Country ${countryISO} not found in ADM0 data`);
+  //       return;
+  //     }
 
-      // Use the existing zoomToCountryOnly function
-      zoomToCountryOnly(countryFeature, countryISO);
+  //     // Use the existing zoomToCountryOnly function
+  //     zoomToCountryOnly(countryFeature, countryISO);
 
-    } catch (err) {
-      console.error('Error loading country without regions:', err);
-    }
-  }, [adm0Path]);
+  //   } catch (err) {
+  //     console.error('Error loading country without regions:', err);
+  //   }
+  // }, [adm0Path]);
 
   const zoomToCountryOnly = (feature, iso) => {
     const map = mapRef.current;
@@ -511,11 +511,10 @@ const DrillDownMap = ({
         console.error('No shapeGroup found for country');
         return;
       }
-
-      if (!countriesWithADM1[iso]) {
-        zoomToCountryOnly(feature, iso);
-        return;
-      }
+      // if (!countriesWithADM1[iso]) {
+      //   zoomToCountryOnly(feature, iso);
+      //   return;
+      // }
 
       const url = adm1PathTemplate.replace('{iso}', iso);
       try {
@@ -724,11 +723,7 @@ const DrillDownMap = ({
       if (level === 'world') {
         loadWorld();
       } else if (level === 'country' && countryISO) {
-        if (countriesWithADM1[countryISO]) {
-          loadCountryRegions(countryISO);
-        } else {
-          loadCountryWithoutRegions(countryISO);
-        }
+        loadCountryRegions(countryISO);
       } else if (level === 'region' && countryISO && regionID) {
         loadCountryRegions(countryISO, regionID);
       }
