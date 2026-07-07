@@ -1,11 +1,11 @@
 // Shared map configuration
 
-//Deprecated functionality if you want you can configure it to show the regions to specific countries.
-// export const countriesWithADM1 = {
-//   USA: true,
-//   ESP: true,
-//   BIH: true,
-// };
+// Deprecated functionality if you want you can configure it to show the regions to specific countries.
+export const countriesWithADM1 = {
+  USA: true,
+  ESP: true,
+  BIH: true,
+};
 
 // Build resource URLs that work in dev (/) and in a built site served from a sub-path (vite base)
 const base = (import.meta.env.BASE_URL || "/").replace(/\/+$/, "/");
