@@ -1,1 +1,1 @@
-Simple drillDownMap component in React That uses it to drill down to a 
+Simple drillDownMap component in React That uses it to drill down to an indiviual country and its ADM1 regions. Selectable, regions return different ids which can be used to manipulate the objects on the screen and attach reports to the visualization.
