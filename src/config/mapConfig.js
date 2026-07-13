@@ -1,4 +1,6 @@
 // Shared map configuration
+
+// Deprecated functionality if you want you can configure it to show the regions to specific countries.
 export const countriesWithADM1 = {
   USA: true,
   ESP: true,
